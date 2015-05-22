@@ -9,7 +9,7 @@
 # ENV
 #   CI          Bootstrap is running in a CI environment.
 #   BASE        Install root. $HOME by default.
-#   CUSTOM      User custom dotfiles path.
+#   CUSTOM      User custom path. $BASE/.dotfiles by default.
 #   PROTOCOL    https by default.
 #   HOST        github.com by default.
 #   REPO        bucaran/wahoo by default.
@@ -254,11 +254,9 @@ lib_wahoo_install() {
     BASE="${HOME}"
   fi
 
-  WAHOO="${BASE}/.wahoo"
+  util_log INFO "Resolving Wahoo path → ${BASE}/.wahoo"
 
-  util_log INFO "Resolving Wahoo path → ${WAHOO}"
-
-  if [ -d "${WAHOO}" ]; then
+  if [ -d "${BASE}/.wahoo" ]; then
     util_log ERROR "Wahoo is already installed."
     util_log INFO "If you want to update Wahoo try: 'fish update'"
     exit 1
@@ -283,8 +281,8 @@ lib_wahoo_install() {
   URL="${PROTOCOL}://${HOST}/${REPO}.git"
 
   util_log INFO "Cloning Wahoo from ${URL}"
-  if ! git clone -b "${BRANCH}" "${URL}" "${WAHOO}"; then
-    uti_log ERROR "git could not clone the repo ${WAHOO}:${BRANCH}"
+  if ! git clone -b "${BRANCH}" "${URL}" "${BASE}/.wahoo"; then
+    uti_log ERROR "git could not clone the repo ${BASE}/.wahoo:${BRANCH}"
     uti_log INFO "Check your environment and try again"
     exit 1
   fi
@@ -308,22 +306,24 @@ lib_wahoo_install() {
   fi
 
   util_log WARN "Adding Wahoo bootstrap to ${FISH_CONFIG}/config.fish"
-  echo "set WAHOO_PATH ${WAHOO}" >> "${FISH_CONFIG}/config.fish"
-  echo "source \$WAHOO_PATH/${INIT}" >> "${FISH_CONFIG}/config.fish"
+
+  if [ -z ${CUSTOM+_} ]; then
+    CUSTOM="${BASE}/.dotfiles"
+  fi
+
+  echo "set -g WAHOO_PATH $(echo "${BASE}/.wahoo" \
+  | sed -e "s|$HOME|\$HOME|")" > "${FISH_CONFIG}/config.fish"
+
+  echo "set -g WAHOO_CUSTOM $(echo "${CUSTOM}" \
+  | sed -e "s|$HOME|\$HOME|")" > "${FISH_CONFIG}/config.fish"
+
+  echo "source \$WAHOO_PATH/${INIT}" > "${FISH_CONFIG}/config.fish"
 
   WAHOO_CONFIG="${HOME}/.config/wahoo"
 
   if [ ! -d "${WAHOO_CONFIG}" ]; then
     util_log WARN "Adding Wahoo configuration in ${WAHOO_CONFIG}"
     mkdir -p "${WAHOO_CONFIG}"
-
-    if [ ! -d "${CUSTOM}" ]; then
-      CUSTOM="$WAHOO/custom"
-    fi
-
-    if [ ! -e "${WAHOO_CONFIG}/custom" ]; then
-      echo "$CUSTOM" >> "${WAHOO_CONFIG}/custom"
-    fi
 
     if [ ! -e "${WAHOO_CONFIG}/theme" ]; then
       echo default >> "${WAHOO_CONFIG}/theme"
