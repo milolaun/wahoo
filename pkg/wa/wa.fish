@@ -19,13 +19,11 @@ function wa -d "Wahoo"
 
   function WAHOO::cli::version
     echo "Wahoo $WAHOO_VERSION"
-    set -l latest (WAHOO::util::get_latest_version)
-    test -z "$latest"; or echo $u"Latest"$__": v$em$latest$__"
   end
 
   function WAHOO::cli::help
     echo "\
-    "(set_color red)"Wahoo"(set_color normal)"
+    "$b"Wahoo"$__"
       The Fishshell Framework
 
     Usage
@@ -227,15 +225,6 @@ function wa -d "Wahoo"
     curl -u "$user" --fail --silent \
       https://api.github.com/repos/$repo/forks \
       -d "{\"user\":\"$user\"}" >/dev/null
-  end
-
-  function WAHOO::util::get_latest_version
-    set -l ver (git ls-remote --tags $github/$source/wahoo | tail -1 \
-    | sed -n 's/.*refs\/tags\/v//p' | sed -n 's/\^{}//p') >/dev/null ^&1
-    switch "$ver"
-      case {0,1,2,3,4,5,6,7,8,9}\*{0,1,2,3,4,5,6,7,8,9}\*
-        echo $ver
-    end
   end
 
   function WAHOO::util::sync_head
