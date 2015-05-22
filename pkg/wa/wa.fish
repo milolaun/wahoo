@@ -28,21 +28,21 @@ function wa -d "Wahoo"
     $b"Wahoo"$__
       The Fishshell Framework
 
-    $b"Usage"$__
-      wahoo $u"action"$__ [ theme/package ]
+    Usage
+      wahoo action [ theme/package ]
 
-    $b"Actions"$__
-         ("$em"U"$__")update  Update Wahoo.
-            ("$em"h"$__")elp  Open Documentation.
-             ("$em"g"$__")et  Install one or more themes/packages.
-            ("$em"l"$__")ist  List installed packages.
-             ("$em"u"$__")se  Apply a theme.
-          ("$em"t"$__")hemes  List all themes.
-         ("$em"R"$__")remove  Remove a theme or package.
-          ("$em"s"$__")ubmit  Submit a package/theme to the registry.
-         ("$em"v"$__")ersion  Show version.
+    Actions
+         (U)update  Update Wahoo.
+            (h)elp  Open Documentation.
+             (g)et  Install one or more themes/packages.
+            (l)ist  List installed packages.
+             (u)se  Apply a theme.
+          (t)hemes  List all themes.
+         (R)remove  Remove a theme or package.
+          (s)ubmit  Submit a package/theme to the registry.
+         (v)ersion  Show version.
 
-    $b For more information visit → $u"git.io/wahoo-doc"$__"
+    For more information visit → git.io/wahoo-doc"
   end
 
   function WAHOO::cli::use
