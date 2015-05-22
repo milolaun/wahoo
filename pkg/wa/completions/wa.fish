@@ -1,4 +1,4 @@
-wa --command wa --arguments "help" \
+complete --command wa --arguments "help" \
   --description "Display Wahoo help."
 
 complete --command wa --arguments "themes" \
