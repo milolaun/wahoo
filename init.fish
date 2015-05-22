@@ -17,6 +17,7 @@ test -d $WAHOO_CUSTOM/$theme
 
 for path in $packages $theme
   autoload $path $path/completions
+  echo "========"$path/(basename $path).fish"========"
   source $path/(basename $path).fish ^/dev/null
     and emit init_(basename $path) $path
 end

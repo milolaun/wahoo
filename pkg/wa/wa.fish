@@ -23,7 +23,7 @@ function wa -d "Wahoo"
 
   function WAHOO::cli::help
     echo "\
-    "$b"Wahoo"$__"
+    Wahoo
       The Fishshell Framework
 
     Usage
