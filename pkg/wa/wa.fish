@@ -35,7 +35,7 @@ function wa -d "Wahoo"
 
     case "t" "th" "thm" "themes"
       if test (count $argv) -ne 1
-        echo (bold)(line)(err)"Too many arguments." 1^&2
+        echo (bold)(line)(err)"Too many arguments" 1^&2
         echo "Usage: $_ $argv[1]" 1^&2
         return $WAHOO_INVALID_ARG
       end
@@ -47,14 +47,14 @@ function wa -d "Wahoo"
       else if test (count $argv) -eq 2
         WAHOO::cli::use $argv[2]
       else
-        echo (bold)(line)(err)"Invalid number of arguments." 1^&2
+        echo (bold)(line)(err)"Invalid number of arguments"(off) 1^&2
         echo "Usage: $_ "(bold)"$argv[1]"(off)" [<theme name>]" 1^&2
         return $WAHOO_INVALID_ARG
       end
 
     case "R" "rm" "remove" "uninstall"
       if test (count $argv) -ne 2
-        echo (bold)(line)(err)"Invalid number of arguments." 1^&2
+        echo (bold)(line)(err)"Invalid number of arguments"(off) 1^&2
         echo "Usage: $_ "(bold)"$argv[1]"(off)" <[package|theme] name>" 1^&2
         return $WAHOO_INVALID_ARG
       end
@@ -74,14 +74,14 @@ function wa -d "Wahoo"
 
     case "s" "su" "sub" "submit"
       if test (count $argv) -ne 2
-        echo (bold)(line)(err)"Argument missing." 1^&2
+        echo (bold)(line)(err)"Argument missing"(off) 1^&2
         echo "Usage: $_ "(bold)"$argv[1]"(off)" <package/theme name>" 1^&2
         return $WAHOO_MISSING_ARG
       end
       WAHOO::cli::submit $argv[2]
 
     case "*"
-      echo (bold)"$argv[1]"(off)" option not recognized." 1^&2
+      echo (bold)(line)(err)"$argv[1] option not recognized"(off) 1^&2
       return $WAHOO_UNKNOWN_OPT
   end
 end
@@ -96,7 +96,7 @@ function WAHOO::cli::help
     The Fishshell Framework
 
   "(bold)"Usage"(off)"
-    wa "(set_color -u)"action"(set_color normal)" [ theme/package ]
+    wa "(line)"action"(off)" [ theme/package ]
 
   "(bold)"Actions"(off)"
     ("(em)"U"(off)")update  Update Wahoo.
@@ -117,13 +117,13 @@ function WAHOO::cli::use
     if not test -e $WAHOO_PATH/themes/$argv[1]
       set -l theme $WAHOO_PATH/db/$argv[1].theme
       if test -e $theme
-        echo "Downloading "(bold)"$theme"(off)"..."
+        echo (bold)"Downloading $theme..."(off)
         git clone (cat $theme) \
           $WAHOO_PATH/themes/$argv[1] >/dev/null ^&1
-          and echo (bold)"$theme"(off)" theme downloaded."
+          and echo (em)"$theme theme downloaded."(off)
           or return $WAHOO_UNKNOWN_ERR
       else
-        echo (bold)(line)(err)"`$argv[1]` is not a valid theme." 1^&2
+        echo (bold)(line)(err)"$argv[1] is not a valid theme"(off) 1^&2
         return $WAHOO_INVALID_ARG
       end
     end
@@ -142,7 +142,8 @@ end
 
 function WAHOO::cli::update
   set -l repo "upstream"
-  test -z (git config --get remote.upstream.url); and set -l repo "origin"
+  test -z (git config --get remote.upstream.url)
+    and set -l repo "origin"
 
   if WAHOO::git::repo_is_clean
     git pull $repo master >/dev/null ^&1
@@ -163,7 +164,7 @@ function WAHOO::cli::get
     else if test -e $WAHOO_PATH/db/$search.pkg
       set target pkg/$search
     else
-      echo "(bold)$search(normal) is not a valid package/theme." 1^&2
+      echo (bold)(line)(err)"$search is not a valid package/theme"(off) 1^&2
       continue
     end
     if test -e $WAHOO_PATH/$target
@@ -171,10 +172,10 @@ function WAHOO::cli::get
       WAHOO::util::sync_head
       popd
     else
-      echo "Installing "(bold)"$search"(off)"..."
+      echo (em)"Installing $search"(off)"..."
       git clone (cat $WAHOO_PATH/db/$search.*) \
         $WAHOO_PATH/$target >/dev/null ^&1
-        and echo (bold)"$search"(off)" succesfully installed."
+        and echo (em)"$search succesfully installed."(off)
     end
   end
   reload
@@ -183,7 +184,7 @@ end
 function WAHOO::cli::remove
   for pkg in $argv
     if not WAHOO::util::validate_package $pkg
-      echo (bold)"$pkg"(off)" is not a valid package/theme name." 1^&2
+      echo (bold)(line)(err)"$pkg is not a valid package/theme name"(off) 1^&2
       return $WAHOO_INVALID_ARG
     end
 
@@ -195,9 +196,9 @@ function WAHOO::cli::remove
     end
 
     if test $status -eq 0
-      echo (bold)"$pkg"(off)" succesfully removed."
+      echo (em)"$pkg succesfully removed."(off)
     else
-      echo (bold)(line)(err)"$pkg could not be found."(off) 1^&2
+      echo (bold)(line)(err)"$pkg could not be found"(off) 1^&2
     end
   end
   reload
@@ -219,31 +220,31 @@ function WAHOO::cli::submit
 
   set -l url (git config --get remote.origin.url)
   if test -z "$url"
-    echo (bold)(line)(err)"`$name`'s remote URL not found."(off) 1^&2
+    echo (bold)(line)(err)"`$name`'s remote URL not found"(off) 1^&2
     echo "Try: git remote add <URL> or see Docs > Submitting" 1^&2
     return $WAHOO_INVALID_ARG
   end
 
   switch "$url"
     case \*bucaran/wahoo\*
-      echo (bold)(line)(err)"$url is not a valid package directory."(off) 1^&2
+      echo (bold)(line)(err)"$url is not a valid package directory"(off) 1^&2
       return $WAHOO_INVALID_ARG
   end
 
   set -l user (git config github.user)
   if test -z "$user"
-    echo (bold)(line)(err)"GitHub user configuration not available."(off) 1^&2
-    echo "Try: "(bold)"git"(off)" config github.user "(line)"username"(off) 1^&2
+    echo (bold)(line)(err)"GitHub user configuration not available"(off) 1^&2
+    echo "Try: git config github.user "(line)"username"(off) 1^&2
     return $WAHOO_INVALID_ARG
   end
 
   if not WAHOO::util::validate_package $name
-    echo (bold)(line)(err)"$pkg is not a valid package/theme name."(off) 1^&2
+    echo (bold)(line)(err)"$pkg is not a valid package/theme name"(off) 1^&2
     return $WAHOO_INVALID_ARG
   end
 
   if test -e $WAHOO_PATH/db/$name$ext
-    echo (bold)(line)(err)"$name already exists in the registry."(off) 1^&2
+    echo (bold)(line)(err)"$name already exists in the registry"(off) 1^&2
     echo "See: "(line)(cat $WAHOO_PATH/db/$name$ext)(off)" for more info." 1^&2
     return $WAHOO_INVALID_ARG
   end
@@ -260,7 +261,7 @@ function WAHOO::cli::submit
   git checkout -b add-$name
 
   echo "$url" > $WAHOO_PATH/db/$name$ext
-  echo "$name added to the registry."
+  echo (em)"$name added to the registry."(off)
 
   git add -A
   git commit -m "Adding $name to registry."
