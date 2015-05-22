@@ -11,6 +11,7 @@ function wa -d "Wahoo"
   function bold; set_color -o; end
   function em; set_color cyan; end
   function off; set_color normal; end
+  function err; set_color red; end
 
   if test (count $argv) -eq 0
     WAHOO::cli::help
@@ -34,7 +35,7 @@ function wa -d "Wahoo"
 
     case "t" "th" "thm" "themes"
       if test (count $argv) -ne 1
-        echo "Wahoo: Too many arguments." 1^&2
+        echo (bold)(line)(err)"Too many arguments." 1^&2
         echo "Usage: $_ $argv[1]" 1^&2
         return $WAHOO_INVALID_ARG
       end
@@ -46,14 +47,14 @@ function wa -d "Wahoo"
       else if test (count $argv) -eq 2
         WAHOO::cli::use $argv[2]
       else
-        echo "Wahoo: Invalid number of arguments." 1^&2
+        echo (bold)(line)(err)"Invalid number of arguments." 1^&2
         echo "Usage: $_ "(bold)"$argv[1]"(off)" [<theme name>]" 1^&2
         return $WAHOO_INVALID_ARG
       end
 
     case "R" "rm" "remove" "uninstall"
       if test (count $argv) -ne 2
-        echo "Wahoo: Invalid number of arguments." 1^&2
+        echo (bold)(line)(err)"Invalid number of arguments." 1^&2
         echo "Usage: $_ "(bold)"$argv[1]"(off)" <[package|theme] name>" 1^&2
         return $WAHOO_INVALID_ARG
       end
@@ -73,7 +74,7 @@ function wa -d "Wahoo"
 
     case "s" "su" "sub" "submit"
       if test (count $argv) -ne 2
-        echo "Wahoo: Argument missing." 1^&2
+        echo (bold)(line)(err)"Argument missing." 1^&2
         echo "Usage: $_ "(bold)"$argv[1]"(off)" <package/theme name>" 1^&2
         return $WAHOO_MISSING_ARG
       end
@@ -122,7 +123,7 @@ function WAHOO::cli::use
           and echo (bold)"$theme"(off)" theme downloaded."
           or return $WAHOO_UNKNOWN_ERR
       else
-        echo "Wahoo: `$argv[1]` is not a valid theme." 1^&2
+        echo (bold)(line)(err)"`$argv[1]` is not a valid theme." 1^&2
         return $WAHOO_INVALID_ARG
       end
     end
@@ -144,12 +145,10 @@ function WAHOO::cli::update
   test -z (git config --get remote.upstream.url); and set -l repo "origin"
 
   if WAHOO::git::repo_is_clean
-    echo "$repo!"
     git pull $repo master >/dev/null ^&1
   else
-    echo "$repo!"
-    git stash
-    if git pull --rebase $repo master
+    git stash >/dev/null ^&1
+    if git pull --rebase $repo master >/dev/null ^&1
       git stash apply >/dev/null ^&1
     else
       WAHOO::util::sync_head # Like a boss
@@ -198,7 +197,7 @@ function WAHOO::cli::remove
     if test $status -eq 0
       echo (bold)"$pkg"(off)" succesfully removed."
     else
-      echo (bold)"$pkg"(off)" could not be found." 1^&2
+      echo (bold)(line)(err)"$pkg could not be found."(off) 1^&2
     end
   end
   reload
@@ -213,38 +212,38 @@ function WAHOO::cli::submit
     case \*.theme
       case ext .theme
     case "*"
-      echo "Missing extension "(bold)".pkg"(off)" or "(bold)".theme"(off) 1^&2
+      echo (bold)(line)(err)"Missing extension .pkg or .theme"(off) 1^&2
       return $WAHOO_INVALID_ARG
   end
   set name (basename $name $ext)
 
   set -l url (git config --get remote.origin.url)
   if test -z "$url"
-    echo "Wahoo: `$name`'s remote URL not found." 1^&2
+    echo (bold)(line)(err)"`$name`'s remote URL not found."(off) 1^&2
     echo "Try: git remote add <URL> or see Docs > Submitting" 1^&2
     return $WAHOO_INVALID_ARG
   end
 
   switch "$url"
     case \*bucaran/wahoo\*
-      echo "Wahoo: "(bold)"$url"(off)" is not a valid package directory." 1^&2
+      echo (bold)(line)(err)"$url is not a valid package directory."(off) 1^&2
       return $WAHOO_INVALID_ARG
   end
 
   set -l user (git config github.user)
   if test -z "$user"
-    echo "Wahoo: GitHub user configuration not available." 1^&2
+    echo (bold)(line)(err)"GitHub user configuration not available."(off) 1^&2
     echo "Try: "(bold)"git"(off)" config github.user "(line)"username"(off) 1^&2
     return $WAHOO_INVALID_ARG
   end
 
   if not WAHOO::util::validate_package $name
-    echo "Wahoo: "(bold)"$pkg"(off)" is not a valid package/theme name." 1^&2
+    echo (bold)(line)(err)"$pkg is not a valid package/theme name."(off) 1^&2
     return $WAHOO_INVALID_ARG
   end
 
   if test -e $WAHOO_PATH/db/$name$ext
-    echo "Wahoo: "(bold)"$name"(off)" already exists in the registry." 1^&2
+    echo (bold)(line)(err)"$name already exists in the registry."(off) 1^&2
     echo "See: "(line)(cat $WAHOO_PATH/db/$name$ext)(off)" for more info." 1^&2
     return $WAHOO_INVALID_ARG
   end
@@ -273,7 +272,7 @@ end
 
 function WAHOO::util::validate_package
   set -l pkg $argv[1]
-  for default in wahoo colors
+  for default in wahoo wa
     if test (echo "$pkg" | tr "[:upper:]" "[:lower:]") = $default
       return 1
     end
