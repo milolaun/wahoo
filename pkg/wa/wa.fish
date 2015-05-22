@@ -144,8 +144,10 @@ function WAHOO::cli::update
   test -z (git config --get remote.upstream.url); and set -l repo "origin"
 
   if WAHOO::git::repo_is_clean
+    echo "$repo!"
     git pull $repo master >/dev/null ^&1
   else
+    echo "$repo!"
     git stash
     if git pull --rebase $repo master
       git stash apply >/dev/null ^&1
