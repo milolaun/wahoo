@@ -25,7 +25,7 @@ function wa -d "Wahoo"
 
   function WAHOO::cli::help
     echo "\
-    $b"Wahoo"$__
+    "(set_color red)"Wahoo"(set_color normal)"
       The Fishshell Framework
 
     Usage
