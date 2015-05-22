@@ -20,8 +20,7 @@ function wa -d "Wahoo"
   function WAHOO::cli::version
     echo "Wahoo $WAHOO_VERSION"
     set -l latest (WAHOO::util::get_latest_version)
-    test -z "$latest"
-      or echo $u"Latest"$__": v$em$latest$__"
+    test -z "$latest"; or echo $u"Latest"$__": v$em$latest$__"
   end
 
   function WAHOO::cli::help
@@ -33,15 +32,15 @@ function wa -d "Wahoo"
       wahoo $u"action"$__ [ theme/package ]
 
     $b"Actions"$__
-         ($em"U"$__)update  Update Wahoo.
-            ($em"h"$__)elp  Open Documentation.
-             ($em"g"$__)et  Install one or more themes/packages.
-            ($em"l"$__)ist  List installed packages.
-             ($em"u"$__)se  Apply a theme.
-          ($em"t"$__)hemes  List all themes.
-         ($em"R"$__)remove  Remove a theme or package.
-          ($em"s"$__)ubmit  Submit a package/theme to the registry.
-         ($em"v"$__)ersion  Show version.
+         ("$em"U"$__")update  Update Wahoo.
+            ("$em"h"$__")elp  Open Documentation.
+             ("$em"g"$__")et  Install one or more themes/packages.
+            ("$em"l"$__")ist  List installed packages.
+             ("$em"u"$__")se  Apply a theme.
+          ("$em"t"$__")hemes  List all themes.
+         ("$em"R"$__")remove  Remove a theme or package.
+          ("$em"s"$__")ubmit  Submit a package/theme to the registry.
+         ("$em"v"$__")ersion  Show version.
 
     $b For more information visit → $u"git.io/wahoo-doc"$__"
   end
@@ -76,8 +75,7 @@ function wa -d "Wahoo"
 
   function WAHOO::cli::update
     set -l repo "upstream"
-    test -z (git config --get remote.upstream.url)
-      and set -l repo "origin"
+    test -z (git config --get remote.upstream.url); and set -l repo "origin"
 
     if WAHOO::git::repo_is_clean
       git pull $repo master >/dev/null ^&1
@@ -185,7 +183,7 @@ function wa -d "Wahoo"
 
     pushd $WAHOO_PATH
 
-    if not git remote show remote ^/dev/null
+    if not git remote show remote >/dev/null ^&1
       WAHOO::util::fork_github_repo "$user" "$source/wahoo"
       git remote remove origin
       git remote add origin $github/$user/wahoo
@@ -225,14 +223,15 @@ function wa -d "Wahoo"
   function WAHOO::util::fork_github_repo
     set -l repo $argv[1]
     set -l user $argv[2]
+
     curl -u "$user" --fail --silent \
       https://api.github.com/repos/$repo/forks \
       -d "{\"user\":\"$user\"}" >/dev/null
   end
 
   function WAHOO::util::get_latest_version
-    set -l ver (git ls-remote --tags $github/$source/wahoo \
-    | tail -1 | sed -n 's/.*refs\/tags\/v//p' | sed -n 's/\^{}//p')
+    set -l ver (git ls-remote --tags $github/$source/wahoo | tail -1 \
+    | sed -n 's/.*refs\/tags\/v//p' | sed -n 's/\^{}//p') >/dev/null ^&1
     switch "$ver"
       case {0,1,2,3,4,5,6,7,8,9}\*{0,1,2,3,4,5,6,7,8,9}\*
         echo $ver
@@ -251,9 +250,8 @@ function wa -d "Wahoo"
   function WAHOO::util::list_themes
     set -l theme (cat $WAHOO_CONFIG/theme)
     set -l regex "[[:<:]]($theme)[[:>:]]"
-    if test (uname) != "Darwin"
-      set regex "\b($theme)\b"
-    end
+    test (uname) != "Darwin"; and set regex "\b($theme)\b"
+
     for theme in (printf "%s\n" $WAHOO_PATH/themes/*)
       basename $theme \
         | sed -E "s/$regex/"$em"\1*"$__"/"
@@ -323,9 +321,9 @@ function wa -d "Wahoo"
       pushd $WAHOO_PATH
       echo $b"Updating Wahoo..."$__
       if WAHOO::cli::update
-        echo $b"Wahoo"$__" is up to date."
+        echo $em"Wahoo"$__" is up to date."
       else
-        echo $b"Wahoo"$__" failed to update."
+        echo $u"Wahoo failed to update."$__
         echo "Please open a new issue here → "$u"git.io/wahoo-issues"$__
       end
       popd
