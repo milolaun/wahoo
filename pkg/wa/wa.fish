@@ -168,11 +168,13 @@ function WAHOO::cli::get
       continue
     end
     if test -e $WAHOO_PATH/$target
+      echo (bold)"Updating $search..."(off)
       pushd $WAHOO_PATH/$target
       WAHOO::util::sync_head
       popd
+      echo (em)"$search up to date."(off)
     else
-      echo (em)"Installing $search"(off)"..."
+      echo (bold)"Installing $search..."(off)
       git clone (cat $WAHOO_PATH/db/$search.*) \
         $WAHOO_PATH/$target >/dev/null ^&1
         and echo (em)"$search succesfully installed."(off)
