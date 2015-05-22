@@ -321,7 +321,7 @@ function wa -d "Wahoo"
       pushd $WAHOO_PATH
       echo $b"Updating Wahoo..."$__
       if WAHOO::cli::update
-        echo $em"Wahoo"$__" is up to date."
+        echo $em"Wahoo is up to date."$__
       else
         echo $u"Wahoo failed to update."$__
         echo "Please open a new issue here → "$u"git.io/wahoo-issues"$__
