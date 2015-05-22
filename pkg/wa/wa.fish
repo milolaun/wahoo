@@ -147,7 +147,7 @@ function WAHOO::cli::update
     git pull $repo master >/dev/null ^&1
   else
     git stash
-    if git pull --rebase $update master
+    if git pull --rebase $repo master
       git stash apply >/dev/null ^&1
     else
       WAHOO::util::sync_head # Like a boss
