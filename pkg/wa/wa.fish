@@ -228,7 +228,7 @@ function WAHOO::cli::submit
 
   set -l url (git config --get remote.origin.url)
   if test -z "$url"
-    echo (bold)(line)(err)"`$name`'s remote URL not found"(off) 1^&2
+    echo (bold)(line)(err)"$name remote URL not found"(off) 1^&2
     echo "Try: git remote add <URL> or see Docs > Submitting" 1^&2
     return $WAHOO_INVALID_ARG
   end
@@ -274,7 +274,7 @@ function WAHOO::cli::submit
   git add -A >/dev/null ^&1
   git commit -m "Adding $name to registry." >/dev/null ^&1
   git pull --rebase upstream >/dev/null ^&1
-  git push origin add-$name 
+  git push origin add-$name
 
   popd
   open "https://github.com"/$user/wahoo
@@ -299,8 +299,8 @@ function WAHOO::util::validate_package
 end
 
 function WAHOO::util::fork_github_repo
-  set -l repo $argv[1]
-  set -l user $argv[2]
+  set -l user $argv[1]
+  set -l repo $argv[2]
 
   curl -u "$user" --fail --silent \
     https://api.github.com/repos/$repo/forks \
