@@ -48,14 +48,14 @@ function wa -d "Wahoo"
         WAHOO::cli::use $argv[2]
       else
         echo (bold)(line)(err)"Invalid number of arguments"(off) 1^&2
-        echo "Usage: $_ "(bold)"$argv[1]"(off)" [<theme name>]" 1^&2
+        echo "Usage: $_ "(em)"$argv[1]"(off)" [<theme name>]" 1^&2
         return $WAHOO_INVALID_ARG
       end
 
     case "R" "rm" "remove" "uninstall"
       if test (count $argv) -ne 2
         echo (bold)(line)(err)"Invalid number of arguments"(off) 1^&2
-        echo "Usage: $_ "(bold)"$argv[1]"(off)" <[package|theme] name>" 1^&2
+        echo "Usage: $_ "(em)"$argv[1]"(off)" <[package|theme] name>" 1^&2
         return $WAHOO_INVALID_ARG
       end
       WAHOO::cli::remove $argv[2..-1]
@@ -75,7 +75,7 @@ function wa -d "Wahoo"
     case "s" "su" "sub" "submit"
       if test (count $argv) -ne 2
         echo (bold)(line)(err)"Argument missing"(off) 1^&2
-        echo "Usage: $_ "(bold)"$argv[1]"(off)" <package/theme name>" 1^&2
+        echo "Usage: $_ "(em)"$argv[1]"(off)" <package/theme name>" 1^&2
         return $WAHOO_MISSING_ARG
       end
       WAHOO::cli::submit $argv[2]
@@ -263,7 +263,7 @@ function WAHOO::cli::submit
     WAHOO::util::fork_github_repo "$user" "bucaran/wahoo"
     git remote rm origin
     git remote add origin "https://github.com"/$user/wahoo
-    git remote add remote "https://github.com"/bucaran/wahoo
+    git remote add upstream "https://github.com"/bucaran/wahoo
   end
 
   git checkout -b add-$name
@@ -271,9 +271,10 @@ function WAHOO::cli::submit
   echo "$url" > $WAHOO_PATH/db/$name$ext
   echo (em)"$name added to the registry."(off)
 
-  git add -A
-  git commit -m "Adding $name to registry."
-  git push origin add-$name
+  git add -A >/dev/null ^&1
+  git commit -m "Adding $name to registry." >/dev/null ^&1
+  git pull --rebase upstream >/dev/null ^&1
+  git push origin add-$name 
 
   popd
   open "https://github.com"/$user/wahoo
