@@ -30,7 +30,7 @@ function wa -d "Wahoo"
 
     case "g" "ge" "get" "install"
       test (count $argv) -eq 1
-        and WAHOO::cli::list $WAHOO_PATH/db/*.pkg .pkg
+        and WAHOO::cli::list $WAHOO_PATH/db/*.pkg .pkg $WAHOO_PATH/pkg
         or WAHOO::cli::get $argv[2..-1]
 
     case "t" "th" "thm" "themes"
@@ -134,9 +134,15 @@ end
 function WAHOO::cli::list
   set -l path $argv[1]
   set -l ext ""
+  set -l exclude ""
   set -q argv[2]; and set ext $argv[2]
+  set -q argv[3]; and set exclude (basename $argv[3]/*)
+
   for item in (printf "%s\n" $path)
-    basename $item "$ext"
+    set item (basename "$item" "$ext")
+    if not contains $item $exclude
+      echo $item
+    end
   end | column
 end
 
@@ -170,7 +176,7 @@ function WAHOO::cli::get
     if test -e $WAHOO_PATH/$target
       echo (bold)"Updating $search..."(off)
       pushd $WAHOO_PATH/$target
-      WAHOO::util::sync_head
+      WAHOO::util::sync_head >/dev/null ^&1
       popd
       echo (em)"$search up to date."(off)
     else
